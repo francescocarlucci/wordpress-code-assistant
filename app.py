@@ -84,12 +84,18 @@ with st.form("code_assistant"):
 			code_response = code_chain.run(task)
 
 			# NOTE possible improvement usgin langchain.output_parsers.regex.RegexParser
-			code_matches = re.findall(r'<\?php.*?\?>', code_response, re.DOTALL)
-			#code_matches = re.findall(r'<\?php(.*?function.*?)\?>', code_response, re.DOTALL)
+			#code_matches = re.findall(r'<\?php.*?\?>', code_response, re.DOTALL)
+			code_matches = re.findall(r'```php(.*?)```', code_response, re.DOTALL)
+
+			full_code = []
 			
 			for code in code_matches:
-			    
-			    st.code(code, language="php")
+
+				if len(code) > 20:
+
+					st.code(code, language="php")
+
+					full_code.append(code)
 
 			if thinking:
 
@@ -98,18 +104,18 @@ with st.form("code_assistant"):
 				st.write(code_response)
 
 
-			if cross_check and code:
+			if cross_check and full_code:
 
 				check_prompt = ChatPromptTemplate.from_template('''
 				You are a Senior QA Tester. Your job is to make sure that the collowing code:
 				{code} is suitable to achieve the following task: {task}
-				If the code is good and suitable, just answer "Yes, the code is OK!".
+				If the code is good and suitable, just answer "SUCCESS, the code is good for this task".
 				If the code is not good for any reason, answer "ERROR" and explain why in detail.
 				''')
 
 				check_chain = LLMChain(llm=llm, prompt=check_prompt)
 
-				check_response = check_chain.run({"code":code, "task":task})
+				check_response = check_chain.run({"code":' '.join(full_code), "task":task})
 
 				st.subheader('QA on provided code')
 
