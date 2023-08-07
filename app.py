@@ -15,16 +15,33 @@ st.subheader('Learn LangChain | Demo Project #4')
 
 st.write('''
 This is a demo project related to the [Learn LangChain](https://learnlangchain.org/) mini-course.
-In this project we will use some core LangChain components (Chains, PromptTemplates, OutputParsers),
-to achieve a powerful outcome: a WordPress code assistant capable to handle real development tasks.
+In this project we will use some core LangChain components (Chains, PromptTemplates), to achieve
+a powerful outcome: a WordPress code assistant capable to handle real development tasks.
 It's inspired by an AI-assisted code technique I use in my own development projects.
 ''')
 
 st.write('''
 The whole approach is based on the Divide and Conquer algorithm: solve a problem by dividing it
 into smaller sub-problems, solving the sub-problems and combining the solutions to succesfully
-complete the initial task. Let's see an example related to WordPress:
+complete the initial task. Let's see an example related to WordPress with a medium complexity:
 ''')
+
+with st.expander("Send a daily welcome message in BuddyPress to newly registered users"):
+    st.write('''
+    The main task can be broken in the following sub-tasks:
+    - When a new user activates his account in BuddyBoss, add a custom user metadata containing
+    the key "to_welcome".
+    - Write a function to send a private BuddyBoss message to a specific user by ID,the message content
+    should be customizable as a variable. Name the function "wca_send_private_message".
+    - Create a WordPress user query that retrieves all the user Ids with the "to_welcome" usermeta,
+    runs a send_private_message($user_id) function to each user and deletes the "to_welcome" metadata.
+    Wrap it in a function called bulk_welcome_users().
+    - add a daily cron event which invokes bulk_welcome_users() using WP cron.
+
+    Try to pass each command to the LLM as Custom prompt below, and the code provided should
+    be suitable to implement a system that sends a daily welcome message in BuddyPress to
+    newly registered users.
+    ''')
 
 st.success("Using this technique, you can use AI to handle most of the tasks frequently \
 	found on freelancing sites like Fiverr, Upwork, Freelancer, etc...", icon="🤑")
@@ -32,6 +49,12 @@ st.success("Using this technique, you can use AI to handle most of the tasks fre
 
 st.info("You need your own keys to run commercial LLM models.\
     The form will process your keys safely and never store them anywhere.", icon="🔒")
+
+st.write('''
+With this form, you can ask your WordPress Code Assistant to perform some demo tasks for you,
+or select custom and provide a customized one. With the checkboxes you can run a "control"
+chain or display the full thinking process of the LLM.
+''')
 
 openai_key = st.text_input("OpenAI Api Key", help="You need an account on OpenAI to generate a key: https://openai.com/blog/openai-api")
 
@@ -48,7 +71,10 @@ task = st.selectbox(
 	'Select a sample WordPress task',
 	(
 		'Store Contact Form 7 submissions as WordPress custom post types',
-		'Write a function that prints out the WP version',
+		'Append a text signature to all Gravity Forms email notifications',
+		'Add a custom text field to WooCommerce products in backend',
+		'After a WooCommerce order is created, send the order data to a 3rd party via API',
+		'Create a function to filter the WP search result and only include posts containing the metakey "indexable"',
 		'Custom'
 	)
 )
@@ -120,7 +146,16 @@ with st.form("code_assistant"):
 				st.subheader('QA on provided code')
 
 				st.write(check_response)
-		
+
+with st.expander("Exercise Tips"):
+    st.write('''
+    This demo is probably the most interesting one to expand and improve:
+    - Browse [the code on GitHub](https://github.com/francescocarlucci/wordpress-code-assistant/blob/main/app.py) and make sure you understand it.
+    - Fork the repository to customize the code.
+    - If you are creating code or WordPress plugin giving multiple prompts, adding memory to the LLM can be a huge improvement. Try it!
+    - Brave improvement: add another step to the chain and try to use a LLM to handle the initial task breakdown.
+    ''')
+
 st.divider()
 
 st.write('A project by [Francesco Carlucci](https://francescocarlucci.com) - \
