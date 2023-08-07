@@ -85,7 +85,7 @@ with st.form("code_assistant"):
 
 	thinking = st.checkbox('Display the full thinking process')
 
-	cross_check = st.checkbox('Execute an additional Chain to cross-check the code provided')
+	cross_check = st.checkbox('Execute an additional chain to cross-check the code provided')
 
 	execute = st.form_submit_button("🚀 Generate Code")
 
@@ -155,6 +155,15 @@ with st.expander("Exercise Tips"):
     - If you are creating code or WordPress plugin giving multiple prompts, adding memory to the LLM can be a huge improvement. Try it!
     - Brave improvement: add another step to the chain and try to use a LLM to handle the initial task breakdown.
     ''')
+
+st.subheader('A note on the cross-check chain')
+
+st.write('''
+While is true that most of the times the check will pass if we have a well writen and specific prompt
+task, this feature is very helpful to handle LLM hallucinations and bad code in response to poorly
+written prompts. Plus, you can try to plug in a different LLM to test the code making the whole system
+more reliable.
+''')
 
 st.divider()
 
