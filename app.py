@@ -59,6 +59,8 @@ with st.form("code_assistant"):
 
 	thinking = st.checkbox('Display the full thinking process')
 
+	cross_check = st.checkbox('Execute an additional Chain to cross-check the code provided')
+
 	execute = st.form_submit_button("🚀 Generate Code")
 
 	if execute:
@@ -67,23 +69,23 @@ with st.form("code_assistant"):
 
 			llm = ChatOpenAI(openai_api_key=openai_key, temperature=0, model_name=model)
 
-			prompt = ChatPromptTemplate.from_template('''
+			code_prompt = ChatPromptTemplate.from_template('''
 			You are a Senior WordPress developer. Your job is to help me writing the best code
 			to achieve the following: {task}
 			Please make sure to enclose the PHP code in <?php ... ?> and describe your thinking
 			proccess in detail.
 			''')
 
-			chain = LLMChain(llm=llm, prompt=prompt)
+			code_chain = LLMChain(llm=llm, prompt=code_prompt)
 
 			if task == "Custom":
 				task = custom_task
 
-			response = chain.run(task)
+			code_response = code_chain.run(task)
 
-			# NOTE can be done with langchain.output_parsers.regex.RegexParser ?
-			# https://github.com/langchain-ai/langchain/issues/6013
-			code_matches = re.findall(r'<\?php.*?\?>', response, re.DOTALL)
+			# NOTE possible improvement usgin langchain.output_parsers.regex.RegexParser
+			code_matches = re.findall(r'<\?php.*?\?>', code_response, re.DOTALL)
+			#code_matches = re.findall(r'<\?php(.*?function.*?)\?>', code_response, re.DOTALL)
 			
 			for code in code_matches:
 			    
@@ -93,7 +95,25 @@ with st.form("code_assistant"):
 
 				st.subheader('Thinking process:')
 
-				st.write(response)
+				st.write(code_response)
+
+
+			if cross_check and code:
+
+				check_prompt = ChatPromptTemplate.from_template('''
+				You are a Senior QA Tester. Your job is to make sure that the collowing code:
+				{code} is suitable to achieve the following task: {task}
+				If the code is good and suitable, just answer "Yes, the code is OK!".
+				If the code is not good for any reason, answer "ERROR" and explain why in detail.
+				''')
+
+				check_chain = LLMChain(llm=llm, prompt=check_prompt)
+
+				check_response = check_chain.run({"code":code, "task":task})
+
+				st.subheader('QA on provided code')
+
+				st.write(check_response)
 		
 st.divider()
 
