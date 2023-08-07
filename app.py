@@ -1,3 +1,4 @@
+import re
 import streamlit as st
 from langchain import LLMChain
 from langchain.chat_models import ChatOpenAI
@@ -14,8 +15,20 @@ st.subheader('Learn LangChain | Demo Project #4')
 
 st.write('''
 This is a demo project related to the [Learn LangChain](https://learnlangchain.org/) mini-course.
-...
+In this project we will use some core LangChain components (Chains, PromptTemplates, OutputParsers),
+to achieve a powerful outcome: a WordPress code assistant capable to handle real development tasks.
+It's inspired by an AI-assisted code technique I use in my own development projects.
 ''')
+
+st.write('''
+The whole approach is based on the Divide and Conquer algorithm: solve a problem by dividing it
+into smaller sub-problems, solving the sub-problems and combining the solutions to succesfully
+complete the initial task. Let's see an example related to WordPress:
+''')
+
+st.success("Using this technique, you can use AI to handle most of the tasks frequently \
+	found on freelancing sites like Fiverr, Upwork, Freelancer, etc...", icon="🤑")
+
 
 st.info("You need your own keys to run commercial LLM models.\
     The form will process your keys safely and never store them anywhere.", icon="🔒")
@@ -28,13 +41,14 @@ model = st.selectbox(
 		'gpt-3.5-turbo',
 		'gpt-4'
 	),
-	help="Make sure your account is enable for GPT4 before using it"
+	help="Make sure your account is elegible for GPT4 before using it"
 )
 
 task = st.selectbox(
 	'Select a sample WordPress task',
 	(
 		'Store Contact Form 7 submissions as WordPress custom post types',
+		'Write a function that prints out the WP version',
 		'Custom'
 	)
 )
@@ -43,28 +57,44 @@ with st.form("code_assistant"):
 
 	custom_task = st.text_input("Write your custom task (available if Selected Task is Custom)", disabled=(task != "Custom"))
 
+	thinking = st.checkbox('Display the full thinking process')
+
 	execute = st.form_submit_button("🚀 Generate Code")
 
 	if execute:
 
-		llm = ChatOpenAI(openai_api_key=openai_key, temperature=0, model_name=model)
+		with st.spinner('Generating code for you...'):
 
-		prompt = ChatPromptTemplate.from_template('''
-		You are a Senior WordPress developer. Your job is to help me writing the best code
-		to achieve the following: {task}
-		''')
+			llm = ChatOpenAI(openai_api_key=openai_key, temperature=0, model_name=model)
 
-		chain = LLMChain(llm=llm, prompt=prompt)
+			prompt = ChatPromptTemplate.from_template('''
+			You are a Senior WordPress developer. Your job is to help me writing the best code
+			to achieve the following: {task}
+			Please make sure to enclose the PHP code in <?php ... ?> and describe your thinking
+			proccess in detail.
+			''')
 
-		if task == "Custom":
-			task = custom_task
+			chain = LLMChain(llm=llm, prompt=prompt)
 
-		response = chain.run(task)
+			if task == "Custom":
+				task = custom_task
 
-		st.write(response)
+			response = chain.run(task)
 
-		st.text("") # empty text helps with formatting
+			# NOTE can be done with langchain.output_parsers.regex.RegexParser ?
+			# https://github.com/langchain-ai/langchain/issues/6013
+			code_matches = re.findall(r'<\?php.*?\?>', response, re.DOTALL)
+			
+			for code in code_matches:
+			    
+			    st.code(code, language="php")
 
+			if thinking:
+
+				st.subheader('Thinking process:')
+
+				st.write(response)
+		
 st.divider()
 
 st.write('A project by [Francesco Carlucci](https://francescocarlucci.com) - \
