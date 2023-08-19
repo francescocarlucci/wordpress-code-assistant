@@ -13,8 +13,9 @@ st.header('🤓 WordPress Code Assistant')
 
 st.subheader('Learn LangChain | Demo Project #4')
 
+st.success("This is a demo project related to the [Learn LangChain](https://learnlangchain.org/) mini-course.")
+
 st.write('''
-This is a demo project related to the [Learn LangChain](https://learnlangchain.org/) mini-course.
 In this project we will use some core LangChain components (Chains, PromptTemplates), to achieve
 a powerful outcome: a WordPress code assistant capable to handle real development tasks.
 It's inspired by an AI-assisted code technique I use in my own development projects.
@@ -42,10 +43,6 @@ with st.expander("Send a daily welcome message in BuddyPress to newly registered
     be suitable to implement a system that sends a daily welcome message in BuddyPress to
     newly registered users.
     ''')
-
-st.success("Using this technique, you can use AI to handle most of the tasks frequently \
-	found on freelancing sites like Fiverr, Upwork, Freelancer, etc...", icon="🤑")
-
 
 st.info("You need your own keys to run commercial LLM models.\
     The form will process your keys safely and never store them anywhere.", icon="🔒")
